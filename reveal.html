@@ -23,16 +23,23 @@
     background: #f1e6d3; border-radius: 12px; word-break: break-word;
     filter: blur(14px); transition: filter 1.2s ease; user-select: none;
   }
-  .name.revealed { filter: blur(0); user-select: text; }
+  .name.revealed { filter: blur(0); user-select: text; cursor: pointer; animation: pop .7s ease .5s; }
+  @keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
   button {
     font: bold 18px Arial, Helvetica, sans-serif; color: #fff; background: #1f6b3a;
     border: 0; border-radius: 10px; padding: 14px 28px; cursor: pointer;
   }
   button:hover { background: #17552d; }
   .hidden { display: none; }
+  #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+  @media (prefers-reduced-motion: reduce) {
+    .name { transition: none; }
+    .name.revealed { animation: none; }
+  }
 </style>
 </head>
 <body>
+  <canvas id="fx" aria-hidden="true"></canvas>
   <div class="card">
     <h1>Secret Santa</h1>
     <div id="ready">
@@ -40,10 +47,11 @@
       <div class="name" id="name" aria-live="polite">Loading</div>
       <button id="btn" type="button">Click to show match</button>
     </div>
-    <p id="done" class="hidden">Shh. Keep it a secret until the gift is opened!</p>
+    <p id="done" class="hidden">Shh. Keep it a secret until the gift is opened! (Tap the name for more confetti.)</p>
     <p id="error" class="hidden">This link looks incomplete. Please use the button in your email, or ask Sam.</p>
   </div>
 <script>
+  // ---------- decode the name from the URL fragment ----------
   function decodeName(hash) {
     try {
       var s = hash.replace(/^#/, '').replace(/-/g, '+').replace(/_/g, '/');
@@ -54,6 +62,89 @@
     } catch (e) { return null; }
   }
 
+  // ---------- confetti ----------
+  var canvas = document.getElementById('fx');
+  var ctx = canvas.getContext('2d');
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var COLORS = ['#d62839', '#1f8a4c', '#f4c430', '#ffffff', '#e85d75', '#7fd1ae'];
+  var SHAPES = ['rect', 'rect', 'circle', 'flake', 'star'];
+  var parts = [];
+  var looping = false;
+  var dpr = window.devicePixelRatio || 1;
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function spawn(x, y, n, angle, spread, power) {
+    for (var i = 0; i < n; i++) {
+      var a = angle + (Math.random() - 0.5) * spread;
+      var v = power * (0.4 + Math.random() * 0.8);
+      parts.push({
+        x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+        size: 6 + Math.random() * 8, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.3,
+        tilt: Math.random() * 6.28, tv: 0.1 + Math.random() * 0.2,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        shape: SHAPES[Math.floor(Math.random() * SHAPES.length)]
+      });
+    }
+    if (!looping) { looping = true; requestAnimationFrame(frame); }
+  }
+
+  function drawPart(p) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.fillStyle = p.color;
+    ctx.strokeStyle = p.color;
+    if (p.shape === 'rect') {
+      ctx.scale(1, Math.cos(p.tilt));  // flutter effect
+      ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+    } else if (p.shape === 'circle') {
+      ctx.beginPath(); ctx.arc(0, 0, p.size / 3, 0, 6.283); ctx.fill();
+    } else {
+      ctx.font = (p.size * 1.6) + 'px Arial, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(p.shape === 'flake' ? '\u2744' : '\u2605', 0, 0);
+    }
+    ctx.restore();
+  }
+
+  function frame() {
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    for (var i = parts.length - 1; i >= 0; i--) {
+      var p = parts[i];
+      p.vy += 0.16; p.vx *= 0.985; p.vy *= 0.985;
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.tilt += p.tv;
+      if (p.y > window.innerHeight + 40) { parts.splice(i, 1); continue; }
+      drawPart(p);
+    }
+    if (parts.length) { requestAnimationFrame(frame); }
+    else { looping = false; ctx.clearRect(0, 0, window.innerWidth, window.innerHeight); }
+  }
+
+  function celebrate(originEl) {
+    if (reduceMotion) return;
+    var r = originEl.getBoundingClientRect();
+    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    var w = window.innerWidth, h = window.innerHeight;
+    spawn(cx, cy, 110, -Math.PI / 2, Math.PI * 2, 11);                  // pop from the name
+    setTimeout(function () {                                           // side cannons
+      spawn(0, h, 60, -Math.PI / 3, 0.7, 20);
+      spawn(w, h, 60, -2 * Math.PI / 3, 0.7, 20);
+    }, 250);
+    var shower = setInterval(function () {                             // gentle snow/confetti shower
+      spawn(Math.random() * w, -10, 3, Math.PI / 2, 0.6, 2);
+    }, 90);
+    setTimeout(function () { clearInterval(shower); }, 3000);
+  }
+
+  // ---------- page logic ----------
   var match = decodeName(window.location.hash);
   var nameEl = document.getElementById('name');
   var btn = document.getElementById('btn');
@@ -67,6 +158,10 @@
       nameEl.classList.add('revealed');
       btn.classList.add('hidden');
       document.getElementById('done').classList.remove('hidden');
+      celebrate(nameEl);
+    });
+    nameEl.addEventListener('click', function () {
+      if (nameEl.classList.contains('revealed')) { celebrate(nameEl); }
     });
   }
 </script>
