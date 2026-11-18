@@ -31,18 +31,18 @@
   }
   button:hover { background: #17552d; }
   .hidden { display: none; }
-  .stage { position: relative; width: 100%; max-width: 440px; margin-top: 80px; }
+  .stage { position: relative; width: 100%; max-width: 440px; margin-top: 165px; }
   .stage .card { position: relative; z-index: 2; }
   .santa {
-    position: absolute; left: 50%; bottom: 100%; width: 150px; z-index: 1; pointer-events: none;
-    transform: translate(-50%, 140px);              /* hidden: tucked behind the card */
+    position: absolute; left: 50%; bottom: 100%; width: 210px; z-index: 1; pointer-events: none;
+    transform: translate(-50%, 190px);              /* hidden: tucked behind the card */
     transition: transform .9s cubic-bezier(.34, 1.56, .64, 1) .35s;
   }
   .santa svg { display: block; width: 100%; height: auto; transform-origin: 50% 100%; }
-  .santa.out { transform: translate(-50%, 24px); }  /* pops up, beard still tucked behind */
+  .santa.out { transform: translate(-50%, 22px); }  /* pops up, beard still tucked behind */
   .santa.out svg { animation: wiggle 2.6s ease-in-out 1.6s infinite; }
   .santa.out.hop svg { animation: hop .6s ease; }
-  @keyframes wiggle { 0%, 100% { rotate: -3deg; } 50% { rotate: 3deg; } }
+  @keyframes wiggle { 0%, 100% { rotate: -2deg; } 50% { rotate: 2deg; } }
   @keyframes hop { 0% { translate: 0 0; } 40% { translate: 0 -16px; } 100% { translate: 0 0; } }
   .mute { position: fixed; right: 14px; bottom: 14px; z-index: 20; padding: 10px 16px;
           font-size: 14px; background: rgba(255,250,242,.92); color: #1f6b3a; }
@@ -61,20 +61,30 @@
   <button id="mute" class="mute hidden" type="button" aria-pressed="false">♪ Music on</button>
   <div class="stage">
     <div class="santa" id="santa">
-      <svg viewBox="0 0 160 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Santa peeking out">
-        <circle cx="80" cy="86" r="36" fill="#f6c9a0"/>
-        <path d="M44 90 C40 132 120 132 116 90 C104 110 56 110 44 90 Z" fill="#ffffff"/>
-        <ellipse cx="70" cy="101" rx="13" ry="7" fill="#ffffff"/>
-        <ellipse cx="90" cy="101" rx="13" ry="7" fill="#ffffff"/>
-        <circle cx="58" cy="94" r="6" fill="#f29b9b" opacity=".7"/>
-        <circle cx="102" cy="94" r="6" fill="#f29b9b" opacity=".7"/>
-        <circle cx="80" cy="93" r="5.5" fill="#e8847c"/>
-        <circle cx="66" cy="82" r="3.6" fill="#2b2b2b"/>
-        <circle cx="94" cy="82" r="3.6" fill="#2b2b2b"/>
-        <path d="M34 66 C34 28 60 8 84 8 C108 8 126 28 126 66 Z" fill="#d62839"/>
-        <path d="M100 12 C128 10 146 28 144 56 C140 64 128 62 128 54 C128 40 116 30 100 28 Z" fill="#d62839"/>
-        <rect x="30" y="52" width="100" height="24" rx="12" fill="#ffffff"/>
-        <circle cx="139" cy="60" r="10" fill="#ffffff"/>
+      <svg viewBox="0 0 240 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Santa holding a sign that says Shh! It's a secret">
+        <g stroke="#d62839" stroke-width="18" stroke-linecap="round" fill="none">
+          <line x1="40" y1="66" x2="72" y2="210"/>
+          <line x1="200" y1="66" x2="168" y2="210"/>
+        </g>
+        <g transform="translate(40 68)">
+          <circle cx="80" cy="86" r="36" fill="#f6c9a0"/>
+          <path d="M44 90 C40 132 120 132 116 90 C104 110 56 110 44 90 Z" fill="#ffffff"/>
+          <ellipse cx="70" cy="101" rx="13" ry="7" fill="#ffffff"/>
+          <ellipse cx="90" cy="101" rx="13" ry="7" fill="#ffffff"/>
+          <circle cx="58" cy="94" r="6" fill="#f29b9b" opacity=".7"/>
+          <circle cx="102" cy="94" r="6" fill="#f29b9b" opacity=".7"/>
+          <circle cx="80" cy="93" r="5.5" fill="#e8847c"/>
+          <circle cx="66" cy="82" r="3.6" fill="#2b2b2b"/>
+          <circle cx="94" cy="82" r="3.6" fill="#2b2b2b"/>
+          <path d="M34 66 C34 28 60 8 84 8 C108 8 126 28 126 66 Z" fill="#d62839"/>
+          <path d="M100 12 C128 10 146 28 144 56 C140 64 128 62 128 54 C128 40 116 30 100 28 Z" fill="#d62839"/>
+          <rect x="30" y="52" width="100" height="24" rx="12" fill="#ffffff"/>
+          <circle cx="139" cy="60" r="10" fill="#ffffff"/>
+        </g>
+        <rect x="10" y="4" width="220" height="56" rx="8" fill="#fffaf2" stroke="#8f1d26" stroke-width="3"/>
+        <text x="120" y="39" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="20" font-weight="bold" fill="#8f1d26" textLength="196" lengthAdjust="spacingAndGlyphs">Shh! It’s a secret</text>
+        <circle cx="40" cy="60" r="12" fill="#ffffff" stroke="#cfc6b8" stroke-width="1.5"/>
+        <circle cx="200" cy="60" r="12" fill="#ffffff" stroke="#cfc6b8" stroke-width="1.5"/>
       </svg>
     </div>
   <div class="card">
